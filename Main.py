@@ -1,20 +1,12 @@
-from rich.layout import Layout
 import Console as c
 
-title = "   Web Scraper"
+title = "Web Scraper"
 version = "1.0"
 
-
-layout = Layout()
-
-delay = 1
-
-
-
+#limpar as anotacoes para fazer commit
 def main():
 
     console = c.Console(title,version)
-
     pass
 
 if __name__ == "__main__":
