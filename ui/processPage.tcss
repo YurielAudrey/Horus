@@ -1,0 +1,32 @@
+Screen
+{
+    layout:grid;
+    grid-size:3 3;
+    grid-gutter: 3;
+
+}
+Header
+{
+    margin-bottom:1;
+}
+.table
+{   height:auto;
+    column-span:1;
+    row-span:1;
+    align: center middle;
+}
+.log
+{   margin-left:2;
+    column-span:1;
+    row-span:3;
+}
+.erros
+{
+    column-span:1;
+    row-span:3;
+}
+.tst
+{   column-span:1;
+    row-span:2;
+    background:black;
+}
