@@ -9,71 +9,58 @@ from core import engine as e
 class ProcessScreen(Screen):
     def __init__(self,qtd,url, cfg, isolation, load=False):
         super().__init__()
-        self.qtd = qtd
-        self.url = url
-        self.cfg=cfg
-        self.isolation = isolation
-        self.load = load
+        self.qtd = qtd #mudar para o dict
+        self.url = url #mudar para o dict
+        self.cfg=cfg #mudar para o dict
+        self.isolation = isolation #mudar para o dict
+        self.load = load #mudar para o dict
+
+        self.infos = {
+            "Email": self.cfg['email'],
+            "Threads": self.cfg['threads'],
+            "Isolamento": self.isolation,
+            "Path": self.cfg['path'],
+            "Url Inicial": self.url,
+            "Quantidade": self.qtd,
+        }
+
+
     CSS_PATH =  "processPage.tcss"
     def compose(self):
+
         yield Header()
-
-
-        yield Vertical(
-                    Horizontal(
-                        Label("Informacoes"),
-                        classes="infoLabel"
-                    ),
-                    Rule(orientation="horizontal", line_style="solid", classes="RuleSeparador"),
-                    Horizontal(
-                        Label("Email:",classes="ILabel"),
-                        Label(f"{self.cfg['email']}"),
-                        classes="ILabel"
-                    ),
-                    Rule(orientation="horizontal", line_style="solid", classes="RuleSeparador"),
-                    Horizontal(
-                        Label("Threads:",classes="ILabel"),
-                        Label(f"{self.cfg['threads']}"),
-                        classes="ILabel"
-                    ),
-                    Rule(orientation="horizontal", line_style="solid", classes="RuleSeparador"),
-                    Horizontal(
-                        Label("Isolamento:",classes="ILabel"),
-                        Label(f"{self.isolation}"),
-                        classes="ILabel"
-                    ),
-                    Rule(orientation="horizontal", line_style="solid", classes="RuleSeparador"),
-                    Horizontal(
-                        Label("Path:",classes="ILabel"),
-                        Label(f"{self.cfg['path']}"),
-                        classes="ILabel"
-                    ),
-                    Rule(orientation="horizontal", line_style="solid", classes="RuleSeparador"),
-                    Horizontal(
-                        Label("Url Inicial:",classes="ILabel"),
-                        Label(f"{self.url}"),
-                        classes="ILabel"
-                    ),
-                    Rule(orientation="horizontal", line_style="solid", classes="RuleSeparador"),
-                    Horizontal(
-                        Label("Quantidade:",classes="ILabel"),
-                        Label(f"{self.qtd}"),
-                        classes="ILabel"
-                    ),
-                    Rule(orientation="horizontal", line_style="solid", classes="RuleSeparador"),
-                    classes="verticalConfig")
+        yield self.lay()
         yield Log(classes="log", auto_scroll=True)
         yield DataTable(classes="table")
-
-
-
-
         yield Footer()
 
-    def on_mount(self)->None:
-        log = self.query_one(Log)
-        log.write_line("msg mount")
+    #preset de parte da interface
+    def lay(self)-> Vertical:
+        items = []
 
+        items.append(Horizontal(Label("Informações"),
+                                classes="infoTitle"))
+        for label, value in self.infos.items():
+            items.append(Rule(orientation="horizontal",
+                              line_style="solid",
+                              classes="RuleSeparador"))
+
+            items.append(self.presetInfo(label, value))
+
+        items.append(Rule(orientation="horizontal",
+                          line_style="solid",
+                          classes="RuleSeparador"))
+
+        return Vertical(*items, classes="verticalConfig")
+
+
+    #presente de um horizontal com label dentro
+    def presetInfo(self,name:str,info) -> Horizontal:
+
+        return Horizontal(Label(name, classes="ILabel"),Label(f"{info}"),classes="ILabel")
+
+    # cria as colunas e linhas da tabela
+    def on_mount(self)->None:
         table = self.query_one(DataTable)
         table.add_column("Type", key="type")
         table.add_column("Concluida", key="ok")
@@ -87,14 +74,13 @@ class ProcessScreen(Screen):
         table.add_row("TEXT", "0", "0", "0", key="row_txt")
         self.start_run()
 
+    #inicializa o engine
     @work(thread=True)
-    def start_run(self):  # Remova o 'async'
+    def start_run(self):
         title = "Horus"
         version = "1.0"
 
         ua = {'User-Agent': f"{title}/{version} (https://github.com/YurielAudrey; {self.cfg['email']})"}
-
-        self.app.call_from_thread(self.query_one(Log).write_line, "msg start")
 
         def update_ui(p, r, t,m):
             self.post_message(uup.UiUpdate(p, r, t,m))
@@ -102,7 +88,9 @@ class ProcessScreen(Screen):
         engine_inst = e.engine(self.url, self.cfg, self.isolation, self.load, ua, update_ui)
         engine_inst.start()
 
+
     @on(uup.UiUpdate)
+    #atualiza as informacoes da interface
     def atualizar_labels(self, message: uup.UiUpdate):
         log = self.query_one(Log)
         tipos = {
@@ -113,20 +101,10 @@ class ProcessScreen(Screen):
         }
 
         for i in message.log:
-            try:
-                # Se o destino for o widget Log do Textual, ele aceita o objeto Text!
-                log.write(i)
-            except TypeError:
-                # Se der erro, é porque algo no caminho exige string pura
-                log.write(f"{str(i.plain)}\n")
+            log.write(f"{str(i.plain)}\n")
 
         for key_engine, key_tabela in tipos.items():
             table = self.query_one(DataTable)
-
-
-
-
-
             valor_concluido = len(message.concluida.get(key_engine, []))
             valor_pendente = message.pendente.get(key_engine, 0)
             valor_total = message.total.get(key_engine, 0)

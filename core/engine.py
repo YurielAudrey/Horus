@@ -7,7 +7,7 @@ import core.thread_manager as tm
 import core.queue_manager as qm
 import core.storage_handler as sh
 from datetime import datetime
-import core.parser_utils as pu
+import core.utils as pu
 
 
 column = ["desc","Concluidas","Restante","total","Loading"]
@@ -28,7 +28,7 @@ class engine:
         self.txt_old = []
         self.log_cache=[]
         self.stats_data = set()
-
+    #inicia o codigo principal do scrapper
     def start(self) -> None:
         self.log_cache.append(pu.log_Manager("[INFO]Engine Iniciada "))
 
@@ -66,6 +66,7 @@ class engine:
 
         self.t.join_thr()
 
+    #comeca capturar as urls
     def manager_list(self,**kwargs) -> None:
         while True:
             url= self.queue.get_url()
@@ -80,10 +81,8 @@ class engine:
             if permission:
                 up = urlparse(url)
                 html = self.session.get(url, headers=self.ua)
-
                 msg ,page_new, down_new = nm.get_url(up.scheme, up.netloc, html)
                 self.log_cache.append(msg)
-
                 self.queue.put_item(page_list=page_new,down_list=down_new)
                 down_new.clear()
                 page_new.clear()
@@ -98,7 +97,7 @@ class engine:
                     break
 
 
-
+    #realiza o download dos arquivos
     def download(self,**kwargs) -> None :
         path = kwargs['path']
         while True:
@@ -113,6 +112,7 @@ class engine:
                 self.log_cache.append(pu.log_Manager("[INFO]Sem Mais Arquivos para baixar"))
                 break
 
+    #atualiza as variaveis e para enviar para a interface atravez de message do textual
     def att_var(self):
         concluida = {
             'urls': self.page_old,

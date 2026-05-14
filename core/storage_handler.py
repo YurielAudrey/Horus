@@ -1,7 +1,7 @@
 import configparser
 import os
 
-
+#salva as url capturada para continuar posteriormente
 def save_csv_url(urls:list,path:str,encod:str):
     with open(path,"w",encoding=encod) as f:
         fl = ""
@@ -11,6 +11,7 @@ def save_csv_url(urls:list,path:str,encod:str):
         f.write(fl)
         f.close()
 
+#le o arquivo com as url salva
 def load_url(path:str,encod:str)->list:
     try:
         with open(path,"r",encoding=encod) as f:
@@ -19,6 +20,7 @@ def load_url(path:str,encod:str)->list:
     except:
         return []
 
+#salva o arquivo na lista de download
 def save_file(name_file:str,path,response):
     os.makedirs(os.path.dirname(f"{path}\\Horus"), exist_ok=True)
     p = f"{path}\Horus_{name_file}"
@@ -27,6 +29,7 @@ def save_file(name_file:str,path,response):
         f.close()
     return True
 
+#cria o arquivo .ini
 def save_cfg(**kwargs):
     config = configparser.ConfigParser()
     threads = kwargs['threads']
@@ -47,7 +50,7 @@ def save_cfg(**kwargs):
     with open('config/config.ini','w') as configfile:
         config.write(configfile)
         configfile.close()
-
+#transforma o arquivo .INI em um dict
 def load_cfg():
     config = configparser.ConfigParser()
 
@@ -57,9 +60,9 @@ def load_cfg():
         path = config['Geral']['path']
         email = config['Geral']['email']
 
-        img_bool= bool(config['Formatos']['img'])
-        video_bool = bool(config['Formatos']['videos'])
-        text_bool = bool(config['Formatos']['text'])
+        img_bool= config['Formatos']['img']
+        video_bool = config['Formatos']['videos']
+        text_bool = config['Formatos']['text']
 
         cfg = {
             "threads": threads,

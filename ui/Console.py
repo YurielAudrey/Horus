@@ -41,7 +41,6 @@ class ui(App):
                 Horizontal(
                     Checkbox("Load", classes="Check", id="load_check"),
                     Checkbox("Isolar", classes="Check", id="isola_check"),
-
                     classes="vertical1"
                 )
                 ,
@@ -60,19 +59,16 @@ class ui(App):
                     Label("Email", classes="label_cfg"),
                     Input(placeholder="", classes="input_cfg", type="text", id="email_input"),
                     classes="vertical_cfg"
-
                 ),
                 Horizontal(
                     Label("Path", classes="label_cfg"),
                     Input(placeholder="", classes="input_cfg", type="text", id="path_input"),
                     classes="vertical_cfg",
-
                 ),
                 Horizontal(
                     Label("Threads", classes="label_cfg"),
                     Input(placeholder="", classes="input_cfg var1", type="number", id="threads_input"),
                     classes="vertical_cfg",
-
                 ),
                 Horizontal(
                     Horizontal(classes="gambiarra"),  # mudar
@@ -89,14 +85,28 @@ class ui(App):
                 ),
                 Horizontal(classes="gambiarra"),  # mudar
                 Button("Salvar Configuracao", classes="ButtonRun", id="config"),
-
             )
         )
 
         yield Footer(name="Footer")
 
+    def on_mount(self):
+        cfg,_ = sh.load_cfg()
+        t = cfg['threads']
 
+        self.query_one("#email_input", Input).value = cfg['email']
+        self.query_one("#threads_input", Input).value = str(t)
+        self.query_one("#path_input", Input).value = cfg['path']
+        selection_list = self.query_one("#types", SelectionList)
 
+        if cfg['img'] == "True":
+            selection_list.select("img")
+        if cfg['video'] == "True" :
+            selection_list.select("vid")
+        if cfg['text'] == "True" :
+            selection_list.select("txt")
+
+    #funcoes dos botoes da interface
     def on_button_pressed(self, event: Button.Pressed):
         if event.button.id == "config":
             email = self.query_one("#email_input", Input).value
@@ -135,10 +145,11 @@ class ui(App):
             self.push_screen(screen)
 
 
-
+    #binding para salvar e sair (falta implementar)
     def action_save_quit(self) -> None:
         self.exit()
 
+    # binding para pausar (falta implementar)
     def action_pause(self) -> None:
         pass
 

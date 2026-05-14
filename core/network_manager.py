@@ -1,16 +1,14 @@
 from urllib.robotparser import RobotFileParser
 from bs4 import BeautifulSoup as s
 from urllib.parse import urlparse
-from core import parser_utils as pu
+from core import utils as pu
 from pathlib import Path
 
-
+#verifica o Robot verificando sites proibidos , Site Map ,crawl delay , request rate
 def verify_robot(url_inicial ,session,url,ua,isolation):
     ui = urlparse(url_inicial)
     parsed_url = urlparse(url)
     site_map = []
-    #caso a opcao isolamento esteja ativada , ele verifica se o url atual e do mesmo site da url inicial
-    #para evitar que ele saia rodando em sites com direitos autorais, ou com conteudo indejesado
     if isolation:
         if parsed_url.netloc != ui.netloc:
             return 0,0,False,site_map
@@ -19,8 +17,6 @@ def verify_robot(url_inicial ,session,url,ua,isolation):
     rp = RobotFileParser()
     cd = rp.crawl_delay(ua)
     rr = rp.request_rate(ua)
-
-
     response = session.get(base_url,headers= ua,stream=True)
 
     if response.status_code == 200:
@@ -28,13 +24,14 @@ def verify_robot(url_inicial ,session,url,ua,isolation):
         rp.read()
         permission = rp.can_fetch(ua, url)
         site_map = rp.site_maps()
-        msg = pu.log_Manager("[INFO]Adcionando Site Map ao banco de dados")
+        msg = pu.log_Manager("[INFO] Adcionando Site Map ao banco de dados")
         return msg, cd,rr, permission, site_map
     else:
         site_map.append(f'{parsed_url.scheme}://{parsed_url.netloc}')
-        msg = pu.log_Manager(f"[INFO]adcionando {parsed_url.scheme}://{parsed_url.netloc} ao banco de dados")
+        msg = pu.log_Manager(f"[INFO] adcionando {url} ao banco de dados")
         return msg, 0 , 0 , True, site_map
 
+#captura todas as Url no HTMl
 def get_url(scheme,netloc,html):
 
     page_url = []
@@ -66,9 +63,10 @@ def get_url(scheme,netloc,html):
 
     page_clear = list(set(filter(None, page_url)))
     img_clear = list(set(filter(None, img_url)))
-    msg = pu.log_Manager(f"[INFO]adcionando {len(page_clear)} URLS e{len(img_clear)} Arquivos")
+    msg = pu.log_Manager(f"[INFO] adcionando {len(page_clear)} URLS e {len(img_clear)} Arquivos")
     return msg, page_clear,img_clear
 
+#Captura o nome do arquivo
 def find_name(url: str) -> str:
     parsed_url = urlparse(url)
     path_file = parsed_url.path
