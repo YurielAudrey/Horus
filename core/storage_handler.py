@@ -12,9 +12,12 @@ def save_csv_url(urls:list,path:str,encod:str):
         f.close()
 
 def load_url(path:str,encod:str)->list:
-    with open(path,"r",encoding=encod) as f:
-        urls=f.readline().split(',')
-        return urls
+    try:
+        with open(path,"r",encoding=encod) as f:
+            urls=f.readline().split(',')
+            return urls
+    except:
+        return []
 
 def save_file(name_file:str,path,response):
     os.makedirs(os.path.dirname(f"{path}\\Horus"), exist_ok=True)

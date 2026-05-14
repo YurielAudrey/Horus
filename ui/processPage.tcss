@@ -2,7 +2,8 @@ Screen
 {
     layout:grid;
     grid-size:3 3;
-    grid-gutter: 3;
+    grid-gutter: 1;
+    background: #0E004A;
 
 }
 Header
@@ -10,23 +11,52 @@ Header
     margin-bottom:1;
 }
 .table
-{   height:auto;
+{
+    padding:2;
+    background:#060121;
+    margin-left:1;
+    margin-bottom:1;
+    height:100%;
     column-span:1;
     row-span:1;
     align: center middle;
 }
 .log
-{   margin-left:2;
-    column-span:1;
+{
+    padding:1 0 0 1;
+    margin:0 1 1 1;
+    column-span:2;
     row-span:3;
+    background:#02051A;
 }
 .erros
 {
     column-span:1;
     row-span:3;
 }
-.tst
-{   column-span:1;
+.verticalConfig
+{
+    margin-left:1;
+    column-span:1;
     row-span:2;
-    background:black;
+    background:#060121;
+    padding:2;
+    content-align:center middle;
+    height:100%;
+}
+.infoLabel
+{   align:center middle;
+    width:100%;
+    height:auto;
+}
+
+.ILabel
+{
+    margin-right:3;
+    width:auto;
+    height:auto;
+}
+
+.RuleSeparador{
+    margin-top:0;
 }

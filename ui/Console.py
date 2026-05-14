@@ -30,7 +30,7 @@ class ui(App):
 
                 Horizontal(
                     Label("URL", classes="label_cfg"),
-                    Input(placeholder="Entre com a URL", classes="input_cfg", type="text", id="url_input"),
+                    Input(value="https://books.toscrape.com/",placeholder="Entre com a URL", classes="input_cfg", type="text", id="url_input"),
                     Horizontal(
                         Label("Quant.", classes="label_cfg"),
                         Input(placeholder="", classes="input_cfg var1", type="number", id="qtd_input"),
@@ -63,14 +63,14 @@ class ui(App):
 
                 ),
                 Horizontal(
-                    Label("Threads", classes="label_cfg"),
-                    Input(placeholder="", classes="input_cfg var1", type="number", id="threads_input"),
+                    Label("Path", classes="label_cfg"),
+                    Input(placeholder="", classes="input_cfg", type="text", id="path_input"),
                     classes="vertical_cfg",
 
                 ),
                 Horizontal(
-                    Label("Path", classes="label_cfg"),
-                    Input(placeholder="", classes="input_cfg", type="text", id="path_input"),
+                    Label("Threads", classes="label_cfg"),
+                    Input(placeholder="", classes="input_cfg var1", type="number", id="threads_input"),
                     classes="vertical_cfg",
 
                 ),
@@ -94,6 +94,8 @@ class ui(App):
         )
 
         yield Footer(name="Footer")
+
+
 
     def on_button_pressed(self, event: Button.Pressed):
         if event.button.id == "config":
@@ -124,11 +126,12 @@ class ui(App):
                         all=all_opx)
 
         if event.button.id == "run":
+            qtd = self.query_one("#qtd_input", Input).value
             url = self.query_one("#url_input", Input).value
             cfg, _ = sh.load_cfg()
             isolation = self.query_one("#isola_check", Checkbox).value
-            load = self.query_one("#isola_check", Checkbox).value
-            screen = ProcessScreen(url,cfg,isolation,load)
+            load = self.query_one("#load_check", Checkbox).value
+            screen = ProcessScreen(qtd,url,cfg,isolation,load)
             self.push_screen(screen)
 
 

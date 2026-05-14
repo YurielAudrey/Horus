@@ -28,10 +28,12 @@ def verify_robot(url_inicial ,session,url,ua,isolation):
         rp.read()
         permission = rp.can_fetch(ua, url)
         site_map = rp.site_maps()
-        return cd,rr, permission, site_map
+        msg = pu.log_Manager("[INFO]Adcionando Site Map ao banco de dados")
+        return msg, cd,rr, permission, site_map
     else:
         site_map.append(f'{parsed_url.scheme}://{parsed_url.netloc}')
-        return 0 , 0 , True, site_map
+        msg = pu.log_Manager(f"[INFO]adcionando {parsed_url.scheme}://{parsed_url.netloc} ao banco de dados")
+        return msg, 0 , 0 , True, site_map
 
 def get_url(scheme,netloc,html):
 
@@ -64,7 +66,8 @@ def get_url(scheme,netloc,html):
 
     page_clear = list(set(filter(None, page_url)))
     img_clear = list(set(filter(None, img_url)))
-    return page_clear,img_clear
+    msg = pu.log_Manager(f"[INFO]adcionando {len(page_clear)} URLS e{len(img_clear)} Arquivos")
+    return msg, page_clear,img_clear
 
 def find_name(url: str) -> str:
     parsed_url = urlparse(url)

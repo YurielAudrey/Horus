@@ -6,6 +6,8 @@ import core.network_manager as nm
 import core.thread_manager as tm
 import core.queue_manager as qm
 import core.storage_handler as sh
+from datetime import datetime
+import core.parser_utils as pu
 
 
 column = ["desc","Concluidas","Restante","total","Loading"]
@@ -24,24 +26,25 @@ class engine:
         self.img_old = []
         self.vid_old = []
         self.txt_old = []
-
-
+        self.log_cache=[]
         self.stats_data = set()
 
     def start(self) -> None:
+        self.log_cache.append(pu.log_Manager("[INFO]Engine Iniciada "))
 
-
-        crawl_delay, request_rate, _, site_map = nm.verify_robot(self.url_inicial,
+        msg,crawl_delay, request_rate, _, site_map = nm.verify_robot(self.url_inicial,
                                                                  self.session,
                                                                  self.url_inicial,
                                                                  self.ua,
                                                                  self.isolation)
 
+        self.log_cache.append(msg)
+
         qm.crawl_delay = crawl_delay
         qm.request_rate = request_rate
 
         if self.load:
-
+            self.log_cache.append(pu.log_Manager("[INFO]Carregando Urls Salvas"))
             self.queue.put_item(page_list=sh.load_url(self.cfg["path"],"utf-8"),
                                 down_list=sh.load_url(self.cfg["path"],"utf-8"))
         else:
@@ -64,27 +67,34 @@ class engine:
         self.t.join_thr()
 
     def manager_list(self,**kwargs) -> None:
-        live = kwargs.get('live')
         while True:
             url= self.queue.get_url()
-            if self.callback:
-                c,p,t = self.att_var()
-                self.callback(c,p,t)
-            _, _, permission, _ = nm.verify_robot(self.url_inicial,
+
+            msg , _ , _ , permission, _ = nm.verify_robot(self.url_inicial,
                                                   self.session,
                                                   url,
-                                                  self.cfg["user-agent"],
+                                                  self.ua,
                                                   self.isolation)
+            self.log_cache.append(msg)
+
             if permission:
                 up = urlparse(url)
-                html = self.session.get(url, headers=self.cfg["user-agent"])
-                page_new, down_new = nm.get_url(up.scheme, up.netloc, html)
+                html = self.session.get(url, headers=self.ua)
+
+                msg ,page_new, down_new = nm.get_url(up.scheme, up.netloc, html)
+                self.log_cache.append(msg)
+
                 self.queue.put_item(page_list=page_new,down_list=down_new)
                 down_new.clear()
                 page_new.clear()
                 self.page_old.append(url)
+                if self.callback:
+                    c, p, t = self.att_var()
+                    m=self.log_cache
+                    self.callback(c, p, t,m)
 
                 if self.queue.page_queue.qsize() == 0:
+                    self.log_cache.append(pu.log_Manager("[INFO]Sem Mais Urls para Processar"))
                     break
 
 
@@ -94,11 +104,13 @@ class engine:
         while True:
             url = self.queue.get_img()
             name_file = nm.find_name(url)
-            response = self.session.get(url,headers = self.cfg["user-agent"])
+            response = self.session.get(url,headers = self.ua)
             sh.save_file(name_file,path,response)
 
             self.img_old.append(url)
+            self.log_cache.append(pu.log_Manager(f"[INFO]Arquivo : {name_file} Salvo"))
             if self.queue.img_queue.qsize()==0:
+                self.log_cache.append(pu.log_Manager("[INFO]Sem Mais Arquivos para baixar"))
                 break
 
     def att_var(self):
@@ -109,10 +121,10 @@ class engine:
             'txt': self.txt_old,
         }
         pendente = {
-            'urls': self.queue.get_url(),
-            'imgs': self.queue.get_img(),
-            'vids': self.queue.get_vid(),
-            'txt': self.queue.get_txt(),
+            'urls': self.queue.page_queue.qsize(),
+            'imgs': self.queue.img_queue.qsize(),
+            'vids': self.queue.vid_queue.qsize(),
+            'txt': self.queue.txt_queue.qsize(),
         }
 
         total = {
