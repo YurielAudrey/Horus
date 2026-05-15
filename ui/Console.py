@@ -30,7 +30,7 @@ class ui(App):
 
                 Horizontal(
                     Label("URL", classes="label_cfg"),
-                    Input(value="https://books.toscrape.com/",placeholder="Entre com a URL", classes="input_cfg", type="text", id="url_input"),
+                    Input(value="http://pt.wikipedia.org/wiki/",placeholder="Entre com a URL", classes="input_cfg", type="text", id="url_input"),
                     Horizontal(
                         Label("Quant.", classes="label_cfg"),
                         Input(placeholder="", classes="input_cfg var1", type="number", id="qtd_input"),

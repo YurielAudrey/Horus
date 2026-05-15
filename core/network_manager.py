@@ -1,35 +1,40 @@
-from urllib.robotparser import RobotFileParser
 from bs4 import BeautifulSoup as s
 from urllib.parse import urlparse
 from core import utils as pu
 from pathlib import Path
+from protego import Protego
+'''
+    
+'''
 
 #verifica o Robot verificando sites proibidos , Site Map ,crawl delay , request rate
-def verify_robot(url_inicial ,session,url,ua,isolation):
+
+#site map - crawl delay - log - permission
+def verify_robot(url_inicial ,session,url,header,isolation):
+
+
     ui = urlparse(url_inicial)
     parsed_url = urlparse(url)
-    site_map = []
-    if isolation:
-        if parsed_url.netloc != ui.netloc:
-            return 0,0,False,site_map
-
+    ua = header['User-Agent']
     base_url = f'{parsed_url.scheme}://{parsed_url.netloc}/robots.txt'
-    rp = RobotFileParser()
+    response = session.get(base_url,headers = header)
+    code =response.status_code
+    rp = Protego.parse(response.text)
+    permission = rp.can_fetch(url,ua)
     cd = rp.crawl_delay(ua)
     rr = rp.request_rate(ua)
-    response = session.get(base_url,headers= ua,stream=True)
+    if isolation:
+        if parsed_url.netloc != ui.netloc:
+            msg = f"[WARN] Sistema de Isolamento bloqueou a saida para sites diferente do inicial"
+            return url,msg ,0, 0, False,code
 
-    if response.status_code == 200:
-        rp.set_url(base_url)
-        rp.read()
-        permission = rp.can_fetch(ua, url)
-        site_map = rp.site_maps()
-        msg = pu.log_Manager("[INFO] Adcionando Site Map ao banco de dados")
-        return msg, cd,rr, permission, site_map
+    if permission:
+        msg = f"[INFO] Permissao Concedida para o Site {url}"
+        return url,msg , cd,rr,permission,code
     else:
-        site_map.append(f'{parsed_url.scheme}://{parsed_url.netloc}')
-        msg = pu.log_Manager(f"[INFO] adcionando {url} ao banco de dados")
-        return msg, 0 , 0 , True, site_map
+        msg = f"[WARN] Permissao Negada para o Site {url}"
+        return url, msg , cd , rr , permission ,code
+
 
 #captura todas as Url no HTMl
 def get_url(scheme,netloc,html):
@@ -63,7 +68,7 @@ def get_url(scheme,netloc,html):
 
     page_clear = list(set(filter(None, page_url)))
     img_clear = list(set(filter(None, img_url)))
-    msg = pu.log_Manager(f"[INFO] adcionando {len(page_clear)} URLS e {len(img_clear)} Arquivos")
+    msg = f"[INFO] adcionando {len(page_clear)} URLS e {len(img_clear)} Arquivos"
     return msg, page_clear,img_clear
 
 #Captura o nome do arquivo
@@ -72,4 +77,5 @@ def find_name(url: str) -> str:
     path_file = parsed_url.path
     name_file = Path(path_file).name
     return name_file
+
 

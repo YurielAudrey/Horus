@@ -29,8 +29,6 @@ class queue_manager:
 
 
     def put_item(self,**kwargs):
-
-
         page_list = kwargs.get('page_list',[])
         down_list = kwargs.get('down_list',[])
 
@@ -53,7 +51,8 @@ class queue_manager:
                     return
             time.sleep(0.1)
 
-
+    def add_delay(self,delay):
+        self.crawl_delay += delay
 
     def get_url(self):
         self.delay_counter()

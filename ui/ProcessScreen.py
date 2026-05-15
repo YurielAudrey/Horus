@@ -9,11 +9,11 @@ from core import engine as e
 class ProcessScreen(Screen):
     def __init__(self,qtd,url, cfg, isolation, load=False):
         super().__init__()
-        self.qtd = qtd #mudar para o dict
-        self.url = url #mudar para o dict
-        self.cfg=cfg #mudar para o dict
-        self.isolation = isolation #mudar para o dict
-        self.load = load #mudar para o dict
+        self.qtd = qtd
+        self.url = url
+        self.cfg=cfg
+        self.isolation = isolation
+        self.load = load
 
         self.infos = {
             "Email": self.cfg['email'],
@@ -80,7 +80,8 @@ class ProcessScreen(Screen):
         title = "Horus"
         version = "1.0"
 
-        ua = {'User-Agent': f"{title}/{version} (https://github.com/YurielAudrey; {self.cfg['email']})"}
+
+        ua =   {'User-Agent': f"{title}/{version} (https://github.com/YurielAudrey/Horus; {self.cfg['email']}) Request/2.32.5"}
 
         def update_ui(p, r, t,m):
             self.post_message(uup.UiUpdate(p, r, t,m))
@@ -101,7 +102,7 @@ class ProcessScreen(Screen):
         }
 
         for i in message.log:
-            log.write(f"{str(i.plain)}\n")
+            log.write(f"{i}\n")
 
         for key_engine, key_tabela in tipos.items():
             table = self.query_one(DataTable)
